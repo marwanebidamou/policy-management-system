@@ -10,6 +10,6 @@ export class BaseError extends Error {
 }
 
 export enum BaseErrorType {
-    NotFound,
-    DeleteUsedItem,
+    NotFound = 404,
+    DeleteUsedItem = 423,
 }

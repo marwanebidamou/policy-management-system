@@ -4,6 +4,7 @@ import cors from 'cors';
 import { PORT } from './config/env';
 import connectDB from './config/db';
 import tagRouter from './routes/tagRoutes';
+import errorHandler from './middlewares/errorHandler';
 
 const app: Application = express();
 
@@ -19,6 +20,9 @@ app.use('/api/tag', tagRouter);
 app.get('/', (req, res) => {
     res.send("GET Request Called")
 })
+
+// Error middleware 
+app.use(errorHandler);
 
 
 connectDB().then(() => {
