@@ -17,9 +17,6 @@ const tagSchema = new mongoose.Schema(
                 ref: 'Policy',
             },
         ],
-    },
-    {
-        versionKey: false,
     }
 );
 

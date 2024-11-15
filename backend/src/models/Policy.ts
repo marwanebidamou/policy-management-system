@@ -39,7 +39,6 @@ const policySchema = new Schema(
     },
     {
         timestamps: true, // for automatic createdAt and updatedAt fields
-        versionKey: true, // for the __v field
     }
 );
 

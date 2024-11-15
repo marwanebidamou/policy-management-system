@@ -21,10 +21,7 @@ const upVoteSchema = new Schema(
             default: Date.now
         }
     }
-    ,
-    {
-        versionKey: false,
-    });
+);
 
 const UpVote = model('UpVote', upVoteSchema);
 
