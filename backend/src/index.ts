@@ -1,6 +1,8 @@
 import express, { Application } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import { PORT } from './config/env';
+import connectDB from './config/db';
 
 const app: Application = express();
 
@@ -16,6 +18,10 @@ app.get('/', (req, res) => {
 })
 
 
-app.listen(3000, () => {
-    console.log(`Server running on http://localhost:3000`);
-});
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}).catch(error => console.error("An error occuring when attempting to connect to mongodb database"));
+
+
