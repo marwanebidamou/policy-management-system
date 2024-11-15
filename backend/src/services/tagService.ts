@@ -1,8 +1,8 @@
 import Tag from '../models/Tag';
 import { CreateTagDTO, UpdateTagDTO } from '../dtos/tag.dto';
-import mongoose from 'mongoose';
 import { BaseError, BaseErrorType } from '../errors/BaseError';
 import Policy from '../models/Policy';
+import { validateAndCastObjectId } from '../validators/customValidators';
 
 /**
  * Create a new tag
@@ -40,7 +40,7 @@ export const getAllTags = async (filters: { name?: string } = {}) => {
  * @param id - The ID of the tag to fetch
  */
 export const getTagById = async (id: string) => {
-    const tag = await Tag.findById(id);
+    const tag = await Tag.findById(validateAndCastObjectId(id));
     if (!tag) {
         throw new BaseError('Tag not found.', BaseErrorType.NotFound);
     }
@@ -53,7 +53,8 @@ export const getTagById = async (id: string) => {
  * @param updateData - Data for updating the tag
  */
 export const updateTag = async (id: string, updateData: UpdateTagDTO) => {
-    const tag = await Tag.findById(id);
+
+    const tag = await Tag.findById(validateAndCastObjectId(id));
     if (!tag) {
         throw new BaseError('Tag not found.', BaseErrorType.NotFound);
     }
@@ -68,7 +69,7 @@ export const updateTag = async (id: string, updateData: UpdateTagDTO) => {
  * @param id - The ID of the tag to delete
  */
 export const deleteTag = async (id: string) => {
-    const tag = await Tag.findById(id);
+    const tag = await Tag.findById(validateAndCastObjectId(id));
     if (!tag) {
         throw new BaseError('Tag not found.', BaseErrorType.NotFound);
     }
