@@ -7,9 +7,13 @@ export const createPolicySchema = z.object({
     tags: z.array(z.string().min(1, 'Tag ID shouldn\'t be empty')).nonempty('At least one tag ID must be provided'),
 });
 
+export const commentPolicySchema = z.object({
+    content: z.string().min(1, 'Comment content is required').max(500, 'Comment shoud be less than 500 characters'),
+});
 
 // Automatically infer TypeScript types from the schemas
 export type CreatePolicyDTO = z.infer<typeof createPolicySchema>;
+export type PostCommentPolicy = z.infer<typeof commentPolicySchema>;
 
 
 export type PolicyDTO = {
@@ -62,4 +66,9 @@ export enum SearchPolicyOrderBy {
 export type UpVotePolicyResponseDTO = {
     success: boolean,
     alreadyVoted: boolean
+}
+
+export type PostCommentResponseDTO = {
+    success: boolean,
+    commentId?: string
 }

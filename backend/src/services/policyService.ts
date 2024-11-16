@@ -1,11 +1,12 @@
 import Policy from '../models/Policy';
-import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy, UpVotePolicyResponseDTO } from '../dtos/policy.dto';
+import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy, UpVotePolicyResponseDTO, PostCommentResponseDTO } from '../dtos/policy.dto';
 import { BaseError, BaseErrorType } from '../errors/BaseError';
 import { validateAndCastObjectId } from '../validators/customValidators';
 import Tag from '../models/Tag';
 import { TagDTO } from '../dtos/tag.dto';
 import UpVote from '../models/UpVote';
 import { string } from 'zod';
+import Comment from '../models/Comment';
 
 /**
  * Create a new policy
@@ -142,4 +143,21 @@ export const UpVotePolicy = async (policyId: string, connectedUserId: string): P
     await UpVote.create({ policyId: policy._id, userId: connectedUserId });
 
     return { success: true, alreadyVoted: false };
+}
+
+
+export const commentPolicy = async (policyId: string, connectedUserId: string, content: string): Promise<PostCommentResponseDTO> => {
+    const isPolicyExists = await Policy.exists({ _id: policyId });
+    if (!isPolicyExists) {
+        throw new BaseError("Policy not found", BaseErrorType.NotFound);
+    }
+
+    const comment = await Comment.create(
+        {
+            policyId: policyId,
+            userId: connectedUserId,
+            content
+        });
+
+    return { success: true, commentId: comment._id.toString() };
 }
