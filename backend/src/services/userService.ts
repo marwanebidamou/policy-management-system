@@ -1,5 +1,6 @@
 import { SignInDTO, SignInResponseDTO, SignUpDTO, SignUpResponseDTO, SignUpResponseStatus } from "../dtos/user.dto";
 import User from "../models/User";
+import { generateToken } from "../utils/jwtUtil";
 import { comparePassword } from "../utils/passwordUtil";
 
 
@@ -17,8 +18,16 @@ export const signIn = async (info: SignInDTO): Promise<SignInResponseDTO> => {
     if (!isMatch) {
         return { success: false }
     }
-
-    return { success: true }
+    //All good => generate jwt token
+    const token = generateToken({ id: user._id });
+    return {
+        success: true,
+        token: token,
+        user: {
+            email: user.email,
+            username: user.username,
+        }
+    }
 };
 
 export const isUsernameExists = async (username: String): Promise<{ exists: boolean }> => {
@@ -44,12 +53,14 @@ export const signUp = async (info: SignUpDTO): Promise<SignUpResponseDTO> => {
     let newUser = new User(info);
     newUser = await newUser.save();
 
+    const token = generateToken({ id: newUser._id });
+
     return {
         success: true,
+        token: token,
         user: {
             email: newUser.email,
             username: newUser.username,
-            _id: newUser._id.toString()
         }
     }
 };
