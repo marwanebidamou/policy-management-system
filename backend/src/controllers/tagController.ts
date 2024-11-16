@@ -5,7 +5,7 @@ import { createTag, updateTag, deleteTag, getAllTags, getTagById } from '../serv
 
 // Create a new tag
 //ParamsDictionary, ResBody, ReqBody, ReqQuery
-export const createTagAction = async (req: Request<undefined, TagDTO, CreateTagDTO, undefined>, res: Response, next: NextFunction) => {
+export const createTagAction = async (req: Request<{}, TagDTO, CreateTagDTO, {}>, res: Response, next: NextFunction) => {
     try {
         const validatedData = createTagSchema.parse(req.body);
         const savedTag = await createTag(validatedData);
@@ -17,7 +17,7 @@ export const createTagAction = async (req: Request<undefined, TagDTO, CreateTagD
 
 // Edit a tag
 //ParamsDictionary, ResBody, ReqBody, ReqQuery
-export const editTagAction = async (req: Request<{ id: string }, TagDTO, UpdateTagDTO, undefined>, res: Response, next: NextFunction) => {
+export const editTagAction = async (req: Request<{ id: string }, TagDTO, UpdateTagDTO, {}>, res: Response, next: NextFunction) => {
     try {
         const validatedData = updateTagSchema.parse(req.body);
         const savedTag = await updateTag(req.params.id, validatedData);
@@ -30,7 +30,7 @@ export const editTagAction = async (req: Request<{ id: string }, TagDTO, UpdateT
 
 // Delete tag
 //ParamsDictionary, ResBody, ReqBody, ReqQuery
-export const deleteTagAction = async (req: Request<{ id: string }, undefined, undefined, undefined>, res: Response, next: NextFunction) => {
+export const deleteTagAction = async (req: Request<{ id: string }, {}, {}, {}>, res: Response, next: NextFunction) => {
     try {
         await deleteTag(req.params.id);
         res.status(204).send();
@@ -41,7 +41,7 @@ export const deleteTagAction = async (req: Request<{ id: string }, undefined, un
 
 // Create a new tag
 //ParamsDictionary, ResBody, ReqBody, ReqQuery
-export const getTagByIdAction = async (req: Request<{ id: string }, TagDTO, undefined, undefined>, res: Response, next: NextFunction) => {
+export const getTagByIdAction = async (req: Request<{ id: string }, TagDTO, {}, {}>, res: Response, next: NextFunction) => {
     try {
         const tag = await getTagById(req.params.id);
         res.status(200).json(tag);
@@ -52,7 +52,7 @@ export const getTagByIdAction = async (req: Request<{ id: string }, TagDTO, unde
 
 // Search tags
 //ParamsDictionary, ResBody, ReqBody, ReqQuery
-export const searchTagsAction = async (req: Request<undefined, [TagDTO], undefined, { q: string }>, res: Response, next: NextFunction) => {
+export const searchTagsAction = async (req: Request<{}, [TagDTO], undefined, { q: string }>, res: Response, next: NextFunction) => {
     try {
         const tag = await getAllTags({ name: req.query.q });
         res.status(200).json(tag);
