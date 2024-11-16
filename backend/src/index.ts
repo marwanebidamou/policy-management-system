@@ -4,6 +4,7 @@ import cors from 'cors';
 import { PORT } from './config/env';
 import connectDB from './config/db';
 import tagRouter from './routes/tagRoutes';
+import authRouter from './routes/authRoutes';
 import errorHandler from './middlewares/errorHandler';
 
 const app: Application = express();
@@ -15,6 +16,7 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // For parsing JSON requests
 
 //Routes
+app.use('/api/auth', authRouter);
 app.use('/api/tag', tagRouter);
 
 app.get('/', (req, res) => {

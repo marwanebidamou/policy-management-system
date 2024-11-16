@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const { Schema, model, Types } = mongoose;
+
+const SALT_ROUNDS = 10;
+
 
 const userSchema = new Schema(
     {
@@ -22,11 +26,6 @@ const userSchema = new Schema(
             type: String,
             required: true,
             minlength: 10,
-
-        },
-        description: {
-            type: String,
-            required: true
         },
         createdPolicies: [
             {
@@ -51,6 +50,19 @@ const userSchema = new Schema(
         timestamps: true, // for automatic createdAt and updatedAt fields
     }
 );
+
+// Pre-save middleware to hash the password
+userSchema.pre('save', async function (next) {
+    if (this.isModified('password')) {
+        this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
+    }
+    next();
+});
+
+// Compare plain text password with hashed password
+userSchema.methods.comparePassword = async function (password: string) {
+    return await bcrypt.compare(password, this.password);
+};
 
 // Create the Policy user
 const User = model('User', userSchema);
