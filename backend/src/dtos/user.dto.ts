@@ -27,5 +27,24 @@ export type SignUpDTO = z.infer<typeof signupSchema>;
 
 export type SignInResponseDTO = {
     success: boolean,
-    email: string
+    token?: string
+}
+
+export type SignUpResponseDTO = {
+    success: boolean,
+    status?: SignUpResponseStatus,
+    token?: string,
+    user?: SignUpUserResponseDTO
+}
+
+type SignUpUserResponseDTO = {
+    username: string,
+    email: string,
+    _id: string
+}
+
+export enum SignUpResponseStatus {
+    EmailAlreadyInUse = 'EmailAlreadyInUse',
+    UsernameAlreadyInUse = 'UsernameAlreadyInUse',
+
 }

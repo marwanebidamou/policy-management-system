@@ -1,18 +1,27 @@
 import { NextFunction, Request, Response } from "express";
-import { loginSchema, SignInDTO, SignInResponseDTO } from "../dtos/user.dto";
-
-import bcrypt from 'bcrypt';
+import { loginSchema, SignInDTO, SignInResponseDTO, SignUpDTO, SignUpResponseDTO, signupSchema } from "../dtos/user.dto";
+import { signIn, signUp } from "../services/userService";
 
 //ParamsDictionary, ResBody, ReqBody, ReqQuery
-export const signInAction = async (req: Request<undefined, SignInDTO, SignInResponseDTO, undefined>, res: Response, next: NextFunction) => {
+export const signInAction = async (req: Request<undefined, SignInResponseDTO, SignInDTO, undefined>, res: Response, next: NextFunction) => {
     try {
         const loginData = loginSchema.parse(req.body);
-
-        const hash = await bcrypt.hash(loginData.password, 10);
-
-        const comparaison = await bcrypt.compare(loginData.password, hash);
-        res.status(200).json({ hash, pass: loginData.password, comparaison });
+        const result = await signIn(loginData);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }
 };
+
+
+export const signUpAction = async (req: Request<undefined, SignUpResponseDTO, SignUpDTO, undefined>, res: Response, next: NextFunction) => {
+    try {
+        const signUpData = signupSchema.parse(req.body);
+        const result = await signUp(signUpData);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+
