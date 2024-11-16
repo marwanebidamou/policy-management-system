@@ -1,8 +1,20 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, model, Document, Types } from 'mongoose';
 
-const { Schema, model, Types } = mongoose;
+// Define a separate interface for Policy
+export interface IPolicy extends Document {
+    title: string;
+    description: string;
+    academicYear: number;
+    authorId: Types.ObjectId; // Reference to the User model
+    upvotesCount: number;
+    comments: Types.ObjectId[]; // Array of references to Comment documents
+    tags: Types.ObjectId[]; // Array of references to Tag documents
+    createdAt: Date;
+    updatedAt: Date;
+}
 
-const policySchema = new Schema(
+// Create the schema
+const policySchema = new Schema<IPolicy>(
     {
         title: {
             type: String,
@@ -12,10 +24,14 @@ const policySchema = new Schema(
         },
         description: {
             type: String,
-            required: true
+            required: true,
+        },
+        academicYear: {
+            type: Number,
+            required: true,
         },
         authorId: {
-            type: Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: 'User',
             required: true,
         },
@@ -26,23 +42,23 @@ const policySchema = new Schema(
         },
         comments: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Comment'
-            }
+                type: Types.ObjectId,
+                ref: 'Comment',
+            },
         ],
         tags: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Tag'
-            }
-        ]
+                type: Types.ObjectId,
+                ref: 'Tag',
+            },
+        ],
     },
     {
-        timestamps: true, // for automatic createdAt and updatedAt fields
+        timestamps: true,
     }
 );
 
-// Create the Policy model
-const Policy = model('Policy', policySchema);
+// Create the model
+const Policy = model<IPolicy>('Policy', policySchema);
 
 export default Policy;
