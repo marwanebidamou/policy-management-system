@@ -72,3 +72,19 @@ export type PostCommentResponseDTO = {
     success: boolean,
     commentId?: string
 }
+
+export type CommentItemDTO = {
+    _id: string,
+    content: string,
+    date: Date,
+    author?: PersonDTO,
+}
+
+export type CommentListDTO = {
+    data: CommentItemDTO[],
+    paginationProps: {
+        total: number,
+        page: number,
+        pages: number
+    }
+}

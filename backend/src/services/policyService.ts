@@ -1,5 +1,5 @@
 import Policy from '../models/Policy';
-import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy, UpVotePolicyResponseDTO, PostCommentResponseDTO } from '../dtos/policy.dto';
+import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy, UpVotePolicyResponseDTO, PostCommentResponseDTO, CommentListDTO, CommentItemDTO } from '../dtos/policy.dto';
 import { BaseError, BaseErrorType } from '../errors/BaseError';
 import { validateAndCastObjectId } from '../validators/customValidators';
 import Tag from '../models/Tag';
@@ -161,3 +161,40 @@ export const commentPolicy = async (policyId: string, connectedUserId: string, c
 
     return { success: true, commentId: comment._id.toString() };
 }
+
+export const getCommentsOfPolicy = async (policyId: string, page: number, limit: number): Promise<CommentListDTO> => {
+    const isPolicyExists = await Policy.exists({ _id: policyId });
+    if (!isPolicyExists) {
+        throw new BaseError("Policy not found", BaseErrorType.NotFound);
+    }
+
+    page = page || 1;
+    limit = limit || 10;
+    const skip = (page - 1) * limit;
+
+    const data = await Comment.find({ policyId: policyId })
+        .populate('userId')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const totalCount = await Comment.countDocuments({ policyId: policyId });
+
+    return {
+        data: data.map(c => ({
+            _id: c._id.toString(),
+            content: c.content,
+            date: c.createdAt,
+            author: (typeof c.userId === 'object' && '_id' in c.userId && 'username' in c.userId) ?
+                { _id: c.userId._id.toString(), username: c.userId.username as string } :
+                { _id: c.userId.toString(), username: '' }
+        })),
+        paginationProps: {
+            total: totalCount,
+            page: page,
+            pages: Math.ceil(totalCount / limit)
+
+        }
+    }
+}
+

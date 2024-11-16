@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { commentPolicySchema, CreatePolicyDTO, createPolicySchema, PolicyDTO, PostCommentPolicy, PostCommentResponseDTO, SearchPolicyDTO, SearchPolicyResultDTO, UpVotePolicyResponseDTO } from "../dtos/policy.dto";
-import { commentPolicy, createPolicy, getAllPolicies, UpVotePolicy } from '../services/policyService';
+import { CommentListDTO, commentPolicySchema, CreatePolicyDTO, createPolicySchema, PolicyDTO, PostCommentPolicy, PostCommentResponseDTO, SearchPolicyDTO, SearchPolicyResultDTO, UpVotePolicyResponseDTO } from "../dtos/policy.dto";
+import { commentPolicy, createPolicy, getAllPolicies, getCommentsOfPolicy, UpVotePolicy } from '../services/policyService';
 
 
 // Create a new tag
@@ -52,6 +52,17 @@ export const commentPolicyAction = async (req: Request<{ id: string }, PostComme
         const comment = commentPolicySchema.parse(req.body);
 
         const result = await commentPolicy(req.params.id, userId, comment.content);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get all comment of a policy
+//ParamsDictionary, ResBody, ReqBody, ReqQuery
+export const getCommentPolicyAction = async (req: Request<{ id: string }, CommentListDTO, {}, { page: number, limit: number }>, res: Response, next: NextFunction) => {
+    try {
+        const result = await getCommentsOfPolicy(req.params.id, req.query.page, req.query.limit);
         res.status(200).json(result);
     } catch (error) {
         next(error);
