@@ -17,7 +17,15 @@ export type PolicyDTO = {
     title: string,
     description: string,
     academicYear: number,
-    tags?: TagDTO[]
+    upvotesCount: number,
+    createdAt: Date,
+    tags?: TagDTO[],
+    author?: PersonDTO
+}
+
+export type PersonDTO = {
+    _id: string,
+    username: string
 }
 
 export type SearchPolicyDTO = {
@@ -37,6 +45,11 @@ export type SearchPolicyDTO = {
 
 export type SearchPolicyResultDTO = {
     criteria: SearchPolicyDTO,
+    paginationProps: {
+        total: number,
+        page: number,
+        pages: number
+    },
     data: PolicyDTO[]
 }
 

@@ -3,6 +3,7 @@ import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResul
 import { BaseError, BaseErrorType } from '../errors/BaseError';
 import { validateAndCastObjectId } from '../validators/customValidators';
 import Tag from '../models/Tag';
+import { TagDTO } from '../dtos/tag.dto';
 
 /**
  * Create a new policy
@@ -41,6 +42,7 @@ export const getAllPolicies = async (
 ): Promise<SearchPolicyResultDTO> => {
     const query: any = {};
 
+    console.log("SEARCH OBJ", searchObj);
     //filter by academic year
     query.academicYear = (searchObj?.filters?.academicYear || new Date().getFullYear()) as number;
 
@@ -61,6 +63,7 @@ export const getAllPolicies = async (
         query.authorId = searchObj.filters.authorId;
     }
 
+
     const page = searchObj?.pagination?.page || 1;
     const limit = searchObj?.pagination?.limit || 10;
     const skip = (page - 1) * limit;
@@ -69,22 +72,40 @@ export const getAllPolicies = async (
 
     const data = await Policy.find(query)
         .populate('tags')
+        .populate('authorId')
         .sort(sortOption)
         .skip(skip)
         .limit(limit);
 
+    const dataTotalCount = await Policy.find(query).countDocuments();
 
     const policies: PolicyDTO[] = data.map((policy) => ({
         _id: policy._id as string,
         title: policy.title,
+        upvotesCount: policy.upvotesCount,
         description: policy.description,
         academicYear: policy.academicYear,
-        //tags: policy.tags.map(tag => { _id: tag._id.toString()})
+        createdAt: policy.createdAt,
+        tags: policy.tags.map((tag) => {
+            if (typeof tag === 'object' && '_id' in tag && 'name' in tag) {
+                return { _id: tag._id.toString(), name: (tag.name as string) };
+            } else {
+                return { _id: tag.toString(), name: '' };
+            }
+        }),
+        author: (typeof policy.authorId === 'object' && '_id' in policy.authorId && 'username' in policy.authorId) ?
+            { _id: policy.authorId._id.toString(), username: policy.authorId.username as string } :
+            { _id: policy.authorId.toString(), username: '' }
     }));
 
 
     return {
         criteria: searchObj,
+        paginationProps: {
+            total: dataTotalCount,
+            page: page,
+            pages: Math.ceil(dataTotalCount / limit)
+        },
         data: policies
     }
 };
