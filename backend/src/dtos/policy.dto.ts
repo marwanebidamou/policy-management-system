@@ -58,3 +58,8 @@ export enum SearchPolicyOrderBy {
     DateAsc = "DateAsc",
     DateDesc = "DateDesc",
 }
+
+export type UpVotePolicyResponseDTO = {
+    success: boolean,
+    alreadyVoted: boolean
+}

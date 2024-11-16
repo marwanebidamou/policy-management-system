@@ -1,9 +1,11 @@
 import Policy from '../models/Policy';
-import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy } from '../dtos/policy.dto';
+import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy, UpVotePolicyResponseDTO } from '../dtos/policy.dto';
 import { BaseError, BaseErrorType } from '../errors/BaseError';
 import { validateAndCastObjectId } from '../validators/customValidators';
 import Tag from '../models/Tag';
 import { TagDTO } from '../dtos/tag.dto';
+import UpVote from '../models/UpVote';
+import { string } from 'zod';
 
 /**
  * Create a new policy
@@ -122,3 +124,22 @@ const getSortOption = (orderBy: SearchPolicyOrderBy | undefined): Record<string,
             return { upvotesCount: -1 }; // Default to upvotes descending
     }
 };
+
+
+export const UpVotePolicy = async (policyId: string, connectedUserId: string): Promise<UpVotePolicyResponseDTO> => {
+    const policy = await Policy.findById(policyId);
+    if (!policy) {
+        throw new BaseError("Policy not found", BaseErrorType.NotFound);
+    }
+    const upvote = await UpVote.findOne({ policyId: policy._id, userId: connectedUserId });
+    if (upvote) {
+        return { success: false, alreadyVoted: true };
+    }
+
+    policy.upvotesCount += 1;
+    await policy.save();
+
+    await UpVote.create({ policyId: policy._id, userId: connectedUserId });
+
+    return { success: true, alreadyVoted: false };
+}
