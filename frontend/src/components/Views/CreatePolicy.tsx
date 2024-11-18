@@ -1,16 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { fetchTags, TagDTO, createTag } from "../../api/policyService";
+import { useGlobalContext } from "../../contexts/GlobalContext";
 
 export default function PolicyCreationForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [availableTags, setAvailableTags] = useState<string[]>([
-    "Privacy",
-    "Terms",
-    "Refunds",
-    "Cookies",
-    "Shipping",
-  ]);
+  const [tags, setTags] = useState<string[]>([]); //ids tags
+  const [availableTags, setAvailableTags] = useState<TagDTO[]>([]);
+
+  const { addNotification } = useGlobalContext();
+
+  useEffect(() => {
+    //Load tags
+    (async () => {
+      await fetchTags().then(x => setAvailableTags(x)).catch(error => {
+        console.error(error);
+        addNotification("An error occured when attempting to load tags! Please refresh the page and try again", "error");
+      })
+    })();
+
+  }, []);
+
+
   const [newTag, setNewTag] = useState("");
 
   const handleTagChange = (tag: string) => {
@@ -21,11 +32,19 @@ export default function PolicyCreationForm() {
     }
   };
 
-  const handleAddNewTag = () => {
-    if (newTag && !availableTags.includes(newTag)) {
-      setAvailableTags([...availableTags, newTag]);
-      setTags([...tags, newTag]); // Optionally select the tag after creation
-      setNewTag(""); // Clear the input field
+  const handleAddNewTag = async () => {
+    if (newTag && !availableTags.find(x => x.name == newTag)) { // check that new tag not already exists
+      createTag({ name: newTag }).then(addedTag => {  //add new tag through api
+        setAvailableTags([...availableTags, addedTag]); //add added tag to available tags state
+        setTags([...tags, addedTag._id]); //select the added tag
+        setNewTag(''); //clear the new tag input
+      }).catch(error => {
+        console.error(error);
+        addNotification(`An error occured when attempting to add the new tag. ${error.message}`, "error");
+      });
+    }
+    else {
+      addNotification(`Tag ${newTag} already exists`, "info");
     }
   };
 
@@ -80,15 +99,15 @@ export default function PolicyCreationForm() {
         <label className="block text-sm font-medium text-gray-900">Tags</label>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {availableTags.map((tag) => (
-            <label key={tag} className="flex items-center gap-2 text-sm text-gray-700">
+            <label key={tag._id} className="flex items-center gap-2 text-sm text-gray-700">
               <input
                 type="checkbox"
-                value={tag}
-                checked={tags.includes(tag)}
-                onChange={() => handleTagChange(tag)}
+                value={tag._id}
+                checked={tags.includes(tag._id)}
+                onChange={() => handleTagChange(tag._id)}
                 className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
               />
-              {tag}
+              {tag.name}
             </label>
           ))}
         </div>

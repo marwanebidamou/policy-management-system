@@ -12,7 +12,7 @@ export const createTag = async (tagData: CreateTagDTO) => {
     // Check if the tag name already exists
     const existingTag = await Tag.findOne({ name: tagData.name });
     if (existingTag) {
-        throw new Error(`Tag with name "${tagData.name}" already exists.`);
+        throw new BaseError(`Tag with name "${tagData.name}" already exists.`, BaseErrorType.InvalidModel);
     }
 
     // Create and save the new tag
