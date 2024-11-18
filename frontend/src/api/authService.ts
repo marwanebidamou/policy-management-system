@@ -14,7 +14,7 @@ export const loginApi = async (username: string, password: string): Promise<Sign
 };
 
 
-export const sigupApi = async (username: string, email: string, password: string): Promise<SignUpResponseDTO> => {
+export const signupApi = async (username: string, email: string, password: string): Promise<SignUpResponseDTO> => {
     try {
         const response = await apiClient.post<SignUpResponseDTO>("/auth/sign-up", { username, email, password });
         return response.data;
