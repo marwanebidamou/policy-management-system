@@ -8,7 +8,8 @@ interface GlobalContextType {
     login: Function,
     logout: Function,
     isAuthenticated: Function,
-    setUi: Function
+    setUi: Function,
+    addNotification: (message: string, type: "success" | "error" | "info") => void
 }
 
 interface UserType {
@@ -25,6 +26,15 @@ const initialUserData: UserType = {
     token: ''
 }
 
+type Notification = {
+    id: string;
+    message: string;
+    type: "success" | "error" | "info";
+};
+
+
+
+
 
 
 //define global context
@@ -35,6 +45,7 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 export function GlobalContextProvider({ children }: { children: ReactNode }) {
     const [userState, setUserState] = useState(initialUserData);
     const [uiState, setUiState] = useState({ heading: '' });
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     useEffect(() => {
 
@@ -64,6 +75,16 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
         return userState.username ? true : false;
     }
 
+    const addNotification = (message: string, type: "success" | "error" | "info") => {
+        const id = Math.random().toString(36).substr(2, 9);
+        setNotifications((prev) => [...prev, { id, message, type }]);
+
+        // Auto-remove notification after 3 seconds
+        setTimeout(() => {
+            setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+        }, 3000);
+    };
+
 
 
     return (
@@ -73,9 +94,26 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
             isAuthenticated,
             login,
             logout,
-            setUi: setUiState
+            setUi: setUiState,
+            addNotification
         }}>
             {children}
+            {/* Notification Overlay */}
+            <div className="fixed top-20 right-5 space-y-4 z-50">
+                {notifications.map((notif) => (
+                    <div
+                        key={notif.id}
+                        className={`flex items-center px-4 py-3 rounded shadow bg-opacity-90 ${notif.type === "success"
+                            ? "bg-green-600 text-white"
+                            : notif.type === "error"
+                                ? "bg-red-600 text-white"
+                                : "bg-blue-600 text-white"
+                            }`}
+                    >
+                        <p className="text-sm">{notif.message}</p>
+                    </div>
+                ))}
+            </div>
         </GlobalContext.Provider>
     )
 }
