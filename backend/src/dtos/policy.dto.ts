@@ -27,6 +27,7 @@ export type PolicyDTO = {
     description: string,
     academicYear: number,
     upvotesCount: number,
+    commentsCount: number,
     createdAt: Date,
     tags?: TagDTO[],
     author?: PersonDTO

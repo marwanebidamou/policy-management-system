@@ -69,9 +69,9 @@ export const getAllPolicies = async (
     }
 
 
-    const page = searchObj?.pagination?.page || 1;
-    const limit = searchObj?.pagination?.limit || 10;
-    const skip = (page - 1) * limit;
+    const page: number = Number(searchObj?.pagination?.page || 1);
+    const limit: number = Number(searchObj?.pagination?.limit || 10);
+    const skip: number = (page - 1) * limit;
 
     const sortOption = getSortOption(searchObj?.orderBy);
 
@@ -82,6 +82,8 @@ export const getAllPolicies = async (
         .skip(skip)
         .limit(limit);
 
+
+
     const dataTotalCount = await Policy.find(query).countDocuments();
 
     const policies: PolicyDTO[] = data.map((policy) => ({
@@ -91,7 +93,8 @@ export const getAllPolicies = async (
         description: policy.description,
         academicYear: policy.academicYear,
         createdAt: policy.createdAt,
-        tags: policy.tags.map((tag) => {
+        commentsCount: policy.commentsCount,
+        tags: policy.tags.map((tag: any) => {
             if (typeof tag === 'object' && '_id' in tag && 'name' in tag) {
                 return { _id: tag._id.toString(), name: (tag.name as string) };
             } else {
@@ -149,10 +152,13 @@ export const UpVotePolicy = async (policyId: string, connectedUserId: string): P
 
 
 export const commentPolicy = async (policyId: string, connectedUserId: string, content: string): Promise<PostCommentResponseDTO> => {
-    const isPolicyExists = await Policy.exists({ _id: policyId });
-    if (!isPolicyExists) {
+    const policy = await Policy.findById(policyId);
+    if (!policy) {
         throw new BaseError("Policy not found", BaseErrorType.NotFound);
     }
+
+    policy.commentsCount += 1;
+    await policy.save();
 
     const comment = await Comment.create(
         {
@@ -170,9 +176,9 @@ export const getCommentsOfPolicy = async (policyId: string, page: number, limit:
         throw new BaseError("Policy not found", BaseErrorType.NotFound);
     }
 
-    page = page || 1;
-    limit = limit || 10;
-    const skip = (page - 1) * limit;
+    page = Number(page || 1);
+    limit = Number(limit || 10);
+    const skip: number = (page - 1) * limit;
 
     const data = await Comment.find({ policyId: policyId })
         .populate('userId')

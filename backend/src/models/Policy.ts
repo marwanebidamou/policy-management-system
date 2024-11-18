@@ -7,6 +7,7 @@ export interface IPolicy extends Document {
     academicYear: number;
     authorId: Types.ObjectId; // Reference to the User model
     upvotesCount: number;
+    commentsCount: number;
     comments: Types.ObjectId[]; // Array of references to Comment documents
     tags: Types.ObjectId[]; // Array of references to Tag documents
     createdAt: Date;
@@ -36,6 +37,11 @@ const policySchema = new Schema<IPolicy>(
             required: true,
         },
         upvotesCount: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        commentsCount: {
             type: Number,
             default: 0,
             min: 0,

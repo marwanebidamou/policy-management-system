@@ -4,11 +4,11 @@ import { authenticate } from '../middlewares/authMiddleware';
 
 const tagRouter = Router();
 
-tagRouter.get('/', authenticate, searchTagsAction);
-tagRouter.get('/:id',authenticate, getTagByIdAction);
-tagRouter.post('/',authenticate, createTagAction);
-tagRouter.put('/:id',authenticate, editTagAction);
-tagRouter.delete('/:id',authenticate, deleteTagAction);
+tagRouter.get('/', searchTagsAction);
+tagRouter.get('/:id', getTagByIdAction);
+tagRouter.post('/', authenticate, createTagAction);
+tagRouter.put('/:id', authenticate, editTagAction);
+tagRouter.delete('/:id', authenticate, deleteTagAction);
 
 export default tagRouter;
 
