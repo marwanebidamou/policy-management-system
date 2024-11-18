@@ -31,7 +31,8 @@ apiClient.interceptors.response.use(
     }
     else if (error.response?.status === 401) {
       // Handle unauthorized access 
-      console.error("Unauthorized! Redirecting to login...");//TODO: redirect to login
+      localStorage.setItem('username', '');
+      localStorage.setItem('token', '');
     }
     return Promise.reject(error);
   }

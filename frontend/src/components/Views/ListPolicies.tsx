@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+import { useGlobalContext } from "../../contexts/GlobalContext";
+import { fetchPolicies, PolicyDTO, SearchPolicyDTO, SearchPolicyOrderBy, SearchPolicyResultDTO } from "../../api/policyService";
+import { Link } from "react-router-dom";
+
 const policies = [
     {
         title: "Privacy Policy",
@@ -47,6 +52,51 @@ const policies = [
 ];
 
 export default function ListPolicies() {
+
+    const { uiConfig, setUi, addNotification } = useGlobalContext();
+
+    const initialSearchObj: SearchPolicyDTO = {
+        filters: {
+            academicYear: new Date().getFullYear(),
+            authorId: undefined,
+            myPoliciesOnly: false,
+            tags: [],
+            title: ''
+        },
+        pagination: {
+            page: 1,
+            limit: 10
+        }
+    }
+
+    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
+
+    const [loading, setLoading] = useState(false);
+
+    const [policies, setListPolicies] = useState(Array<PolicyDTO>);
+
+    useEffect(() => {
+        setUi({ ...uiConfig, heading: 'Policies' });
+        (async () => {
+            setLoading(true);
+            fetchPolicies(initialSearchObj).then(res => {
+                setListPolicies(res.data);
+                setPagination({
+                    page: res.paginationProps.page,
+                    total: res.paginationProps.total,
+                    pages: res.paginationProps.pages,
+                    limit: 10
+                });
+            })
+                .catch(err => {
+                    addNotification('An error occured when attempting fetching data. Please try again later.', "error");
+                    console.error(err);
+                }).finally(() => {
+                    setLoading(false);
+                });
+        })();
+    }, []);
+
     const staticImage = "https://via.placeholder.com/50"; // Static image URL
 
     return (
@@ -67,25 +117,25 @@ export default function ListPolicies() {
                                 {policy.title}
                             </p>
                             <p className="text-xs text-gray-500">
-                                By {policy.author}
+                                By {policy.author?.username}
                             </p>
                             {/* Truncated Description with Read More */}
                             <p className="mt-1 text-sm text-gray-500 line-clamp-2">
                                 {policy.description}
                                 <span className="ml-1 text-blue-500 cursor-pointer">
-                                    <a href={`/policies/${index}`} className="hover:underline">
+                                    <Link to={`/policies/${policy._id}`} className="hover:underline">
                                         Read more
-                                    </a>
+                                    </Link>
                                 </span>
                             </p>
                             {/* Tags */}
                             <div className="mt-2 flex flex-wrap gap-1">
-                                {policy.tags.map((tag, idx) => (
+                                {policy.tags!.map((tag) => (
                                     <span
-                                        key={idx}
+                                        key={tag._id}
                                         className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded"
                                     >
-                                        #{tag}
+                                        #{tag.name}
                                     </span>
                                 ))}
                             </div>
@@ -93,8 +143,8 @@ export default function ListPolicies() {
                     </div>
                     {/* Right Section */}
                     <div className="flex shrink-0 sm:flex-col sm:items-end">
-                        <p className="text-sm text-gray-700">👍 {policy.upvotes}</p>
-                        <p className="text-sm text-gray-700">💬 {policy.comments}</p>
+                        <p className="text-sm text-gray-700">👍 {policy.upvotesCount}</p>
+                        <p className="text-sm text-gray-700">💬 {policy.commentsCount}</p>
                     </div>
                 </li>
             ))}
