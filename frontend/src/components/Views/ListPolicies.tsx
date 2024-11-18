@@ -46,7 +46,7 @@ const policies = [
     },
 ];
 
-export default function Policies() {
+export default function ListPolicies() {
     const staticImage = "https://via.placeholder.com/50"; // Static image URL
 
     return (
