@@ -16,6 +16,11 @@ export type CreatePolicyDTO = z.infer<typeof createPolicySchema>;
 export type PostCommentPolicy = z.infer<typeof commentPolicySchema>;
 
 
+export type CreatedPolicyDto = {
+    _id: string,
+    title: string
+}
+
 export type PolicyDTO = {
     _id: string,
     title: string,

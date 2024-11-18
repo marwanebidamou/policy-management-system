@@ -1,5 +1,5 @@
-import Policy from '../models/Policy';
-import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy, UpVotePolicyResponseDTO, PostCommentResponseDTO, CommentListDTO, CommentItemDTO } from '../dtos/policy.dto';
+import Policy, { IPolicy } from '../models/Policy';
+import { createPolicySchema, CreatePolicyDTO, SearchPolicyDTO, SearchPolicyResultDTO, PolicyDTO, SearchPolicyOrderBy, UpVotePolicyResponseDTO, PostCommentResponseDTO, CommentListDTO, CommentItemDTO, CreatedPolicyDto as CreatedPolicyDTO } from '../dtos/policy.dto';
 import { BaseError, BaseErrorType } from '../errors/BaseError';
 import { validateAndCastObjectId } from '../validators/customValidators';
 import Tag from '../models/Tag';
@@ -12,7 +12,7 @@ import Comment from '../models/Comment';
  * Create a new policy
  * @param tagData - Data for the new policy
  */
-export const createPolicy = async (connectedUser: string, policyData: CreatePolicyDTO) => {
+export const createPolicy = async (connectedUser: string, policyData: CreatePolicyDTO): Promise<CreatedPolicyDTO> => {
 
     const { title, description, tags } = policyData;
     // Ensure all tag IDs are valid
@@ -31,8 +31,10 @@ export const createPolicy = async (connectedUser: string, policyData: CreatePoli
     });
 
     newPolicy = await newPolicy.save();
-    console.log(newPolicy);
-    return newPolicy;
+    return {
+        _id: newPolicy._id as string,
+        title: newPolicy.title
+    };
 };
 
 /**
