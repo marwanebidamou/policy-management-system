@@ -1,17 +1,17 @@
-import { createContext, ReactNode, useContext, useState } from "react"
+import { createContext, ReactNode, useContext, useEffect, useState } from "react"
 
 
 // shape of global context
 interface GlobalContextType {
     user: UserType,
-    ui: UiProps,
+    uiConfig: UiProps,
     login: Function,
     logout: Function,
-    isAuthenticated: Function
+    isAuthenticated: Function,
+    setUi: Function
 }
 
 interface UserType {
-    id: string,
     username: string,
     token: string
 }
@@ -21,7 +21,6 @@ interface UiProps {
 }
 
 const initialUserData: UserType = {
-    id: '',
     username: '',
     token: ''
 }
@@ -34,33 +33,47 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
 //define globab context provide
 export function GlobalContextProvider({ children }: { children: ReactNode }) {
-    const [state, setState] = useState(initialUserData);
+    const [userState, setUserState] = useState(initialUserData);
+    const [uiState, setUiState] = useState({ heading: '' });
 
-    const login = (id: string, username: string, token: string) => {
-        setState({ id, username, token });
-        localStorage.setItem('userId', id);
-        localStorage.setItem('userName', username);
+    useEffect(() => {
+
+        console.log("Globalcontext useEffect");
+        const username = localStorage.getItem('username');
+        const token = localStorage.getItem('token');
+        if (username && token) {
+            setUserState({ username, token });
+        }
+
+    }, []);
+
+
+    const login = (username: string, token: string) => {
+        setUserState({ username, token });
+        localStorage.setItem('username', username);
         localStorage.setItem('token', token);
     }
 
     const logout = () => {
-        setState(initialUserData);
-        localStorage.setItem('userId', '');
-        localStorage.setItem('userName', '');
+        setUserState(initialUserData);
+        localStorage.setItem('username', '');
         localStorage.setItem('token', '');
     }
 
     const isAuthenticated = () => {
-        return state.username ? true : false;
+        return userState.username ? true : false;
     }
+
+
 
     return (
         <GlobalContext.Provider value={{
             user: initialUserData,
-            ui: { heading: 'Policies' },
+            uiConfig: uiState,
             isAuthenticated,
             login,
-            logout
+            logout,
+            setUi: setUiState
         }}>
             {children}
         </GlobalContext.Provider>

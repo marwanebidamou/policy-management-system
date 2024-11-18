@@ -1,11 +1,12 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useGlobalContext } from "../../contexts/GlobalContext";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 const navigation = [
-    { name: "Policies", href: "/policies", current: true },
-    { name: "Create Policy", href: "/create-policy", current: false },
+    { name: "Policies", href: "/policies" },
+    { name: "Create Policy", href: "/create-policy" },
 ];
 
 function classNames(...classes: string[]) {
@@ -15,7 +16,10 @@ function classNames(...classes: string[]) {
 export default function Header() {
 
     const { isAuthenticated, logout } = useGlobalContext();
-
+    const location = useLocation();
+    useEffect(() => {
+        console.log(location);
+    })
     return (
         <Disclosure as="nav" className="bg-gray-800 fixed min-w-full">
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -43,19 +47,19 @@ export default function Header() {
                         <div className="hidden sm:ml-6 sm:block">
                             <div className="flex space-x-4">
                                 {navigation.map((item) => (
-                                    <a
+                                    <Link
                                         key={item.name}
-                                        href={item.href}
-                                        aria-current={item.current ? "page" : undefined}
+                                        to={item.href}
+                                        aria-current={item.href == location.pathname ? "page" : undefined}
                                         className={classNames(
-                                            item.current
+                                            item.href == location.pathname
                                                 ? "bg-gray-900 text-white"
                                                 : "text-gray-300 hover:bg-gray-700 hover:text-white",
                                             "rounded-md px-3 py-2 text-sm font-medium"
                                         )}
                                     >
                                         {item.name}
-                                    </a>
+                                    </Link>
                                 ))}
                             </div>
                         </div>
@@ -112,9 +116,9 @@ export default function Header() {
                             key={item.name}
                             as="a"
                             href={item.href}
-                            aria-current={item.current ? "page" : undefined}
+                            aria-current={item.href == location.pathname ? "page" : undefined}
                             className={classNames(
-                                item.current
+                                item.href == location.pathname
                                     ? "bg-gray-900 text-white"
                                     : "text-gray-300 hover:bg-gray-700 hover:text-white",
                                 "block rounded-md px-3 py-2 text-base font-medium"

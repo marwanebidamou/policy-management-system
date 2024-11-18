@@ -1,19 +1,46 @@
+import { ChangeEvent, FormEvent, FormEventHandler, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useGlobalContext } from "../../contexts/GlobalContext";
+import { loginApi } from "../../api/authService";
 
 export default function SignIn() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const { uiConfig, setUi, login, isAuthenticated } = useGlobalContext();
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        console.log("Sign in UseEffect");
+        if (isAuthenticated()) {
+            console.log("Sign in UseEffect - user connected");
+
+            navigate('/policies');
+            return;
+        }
+        setUi({ ...uiConfig, heading: '' });
+    }, [isAuthenticated()]);
+
+    const submitForm = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        loginApi(username, password).then(res => {
+            if (res.success) {
+                login(res.user?.username, res.token);
+                navigate('/policies')
+            }
+        }).catch(error => {
+
+        });
+    }
+
     return (
         <>
-            {/*
-          This example requires updating your template:
-  
-          ```
-          <html class="h-full bg-white">
-          <body class="h-full">
-          ```
-        */}
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                     <img
-                        alt="Your Company"
+                        alt="{APP_NAME}"
                         src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
                         className="mx-auto h-10 w-auto"
                     />
@@ -23,18 +50,17 @@ export default function SignIn() {
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form action="#" method="POST" className="space-y-6">
+                    <form action="#" onSubmit={submitForm} className="space-y-6" >
                         <div>
                             <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                                Email address
+                                Username / Email address
                             </label>
                             <div className="mt-2">
                                 <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
+                                    id="username"
+                                    name="username"
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
                                     required
-                                    autoComplete="email"
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
                                 />
                             </div>
@@ -57,6 +83,7 @@ export default function SignIn() {
                                     name="password"
                                     type="password"
                                     required
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                                     autoComplete="current-password"
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
                                 />
@@ -75,9 +102,9 @@ export default function SignIn() {
 
                     <p className="mt-10 text-center text-sm/6 text-gray-500">
                         Not a member?{' '}
-                        <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                            Start a 14 day free trial
-                        </a>
+                        <Link to="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                            Sign-up
+                        </Link>
                     </p>
                 </div>
             </div>

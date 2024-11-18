@@ -20,7 +20,7 @@ function App() {
       <div className="flex flex-1 mt-14">
 
         {/* Main Content */}
-        <Main title="Policies">
+        <Main>
           <div className="w-full">
             <Routes>
               {/* Redirect root to policies */}
