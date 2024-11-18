@@ -3,8 +3,8 @@ import apiClient from "./apiClient";
 
 
 
-export const createPolicy = async (policyData: CreatePolicyDTO): Promise<CreatePolicyDTO> => {
-    const response = await apiClient.post<CreatePolicyDTO>("/policy", policyData);
+export const createPolicy = async (policyData: CreatePolicyDTO): Promise<CreatedPolicyDTO> => {
+    const response = await apiClient.post<CreatedPolicyDTO>("/policy", policyData);
     return response.data;
 };
 
@@ -69,6 +69,11 @@ export type CreatePolicyDTO = {
     title: string,
     description: string,
     tags: string[]
+}
+
+export type CreatedPolicyDTO = {
+    _id: string,
+    title: string
 }
 
 export type PostCommentPolicy = {

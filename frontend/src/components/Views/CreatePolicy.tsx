@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { fetchTags, TagDTO, createTag } from "../../api/policyService";
+import { fetchTags, TagDTO, createTag, createPolicy } from "../../api/policyService";
 import { useGlobalContext } from "../../contexts/GlobalContext";
+import { useNavigate } from "react-router-dom";
 
 export default function PolicyCreationForm() {
   const [title, setTitle] = useState("");
@@ -8,9 +9,12 @@ export default function PolicyCreationForm() {
   const [tags, setTags] = useState<string[]>([]); //ids tags
   const [availableTags, setAvailableTags] = useState<TagDTO[]>([]);
 
-  const { addNotification } = useGlobalContext();
+  const { addNotification, setUi, uiConfig } = useGlobalContext();
 
+  const navigate = useNavigate();
   useEffect(() => {
+    //Change Main title
+    setUi({ ...uiConfig, heading: "Create a new Policy" });
     //Load tags
     (async () => {
       await fetchTags().then(x => setAvailableTags(x)).catch(error => {
@@ -50,14 +54,37 @@ export default function PolicyCreationForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
-      title,
-      description,
-      tags,
+    if (title.length < 1) {
+      addNotification('Policy name is required.', "error");
+    } else if (title.length > 100) {
+      addNotification('Policy name shoud be less than 100 characters.', "error");
+    }
+    if (description.length < 1) {
+      addNotification('Description is required.', "error");
+    }
+    if (tags.length == 0) {
+      addNotification('At least one tag ID must be provided.', "error");
+    }
+
+    createPolicy({ title, description, tags }).then(res => {
+      setTitle("");
+      setDescription("");
+      setTags([]);
+
+      navigate(`/policies/${res._id}`)
+
+    }).catch(error => {
+      console.error(error);
+      if (error.success === false && error.error === 'Validation Error') {
+        const errorMessages = error.details.map((detail: { path: string, message: string }) => detail.path + " : " + detail.message).join(`\n`);
+        addNotification(`There are errors in the form. Check these fields and try again.
+               ${errorMessages}`, "error");
+      } else {
+        addNotification(error.message || "An error has occured. Please try again!", "error");
+      }
     });
-    setTitle("");
-    setDescription("");
-    setTags([]);
+
+
   };
 
   return (
