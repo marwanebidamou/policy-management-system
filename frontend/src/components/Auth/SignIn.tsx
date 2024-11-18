@@ -6,9 +6,8 @@ import { loginApi } from "../../api/authService";
 export default function SignIn() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
 
-    const { uiConfig, setUi, login, isAuthenticated } = useGlobalContext();
+    const { uiConfig, setUi, login, isAuthenticated, addNotification } = useGlobalContext();
 
     const navigate = useNavigate();
 
@@ -29,9 +28,17 @@ export default function SignIn() {
             if (res.success) {
                 login(res.user?.username, res.token);
                 navigate('/policies')
+            } else {
+                setPassword('');
+                addNotification("Invalid username or password. Please try again", "error");
             }
         }).catch(error => {
-
+            console.error(error);
+            if (error.success === false && error.error === 'Validation Error') {
+                addNotification("Invalid username or password. Please try again", "error");
+            } else {
+                addNotification("An error has occured. Please try again!", "error");
+            }
         });
     }
 
@@ -102,7 +109,7 @@ export default function SignIn() {
 
                     <p className="mt-10 text-center text-sm/6 text-gray-500">
                         Not a member?{' '}
-                        <Link to="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                        <Link to="/signup" className="font-semibold text-indigo-600 hover:text-indigo-500">
                             Sign-up
                         </Link>
                     </p>
