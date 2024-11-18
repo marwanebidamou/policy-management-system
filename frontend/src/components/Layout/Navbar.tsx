@@ -65,15 +65,6 @@ export default function Header() {
                         </div>
                     </div>
 
-                    {/* Search Bar */}
-                    <div className="hidden sm:block flex-1 mx-6">
-                        <input
-                            type="text"
-                            placeholder="Search policies..."
-                            className="w-full rounded-md bg-gray-700 text-gray-300 placeholder-gray-400 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                        />
-                    </div>
-
                     {/* Right Buttons */}
                     <div className="absolute inset-y-0 right-0 flex items-center space-x-4 pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                         {!isAuthenticated() &&
@@ -127,15 +118,6 @@ export default function Header() {
                             {item.name}
                         </DisclosureButton>
                     ))}
-                </div>
-
-                {/* Mobile Search */}
-                <div className="px-3 py-2">
-                    <input
-                        type="text"
-                        placeholder="Search policies..."
-                        className="w-full rounded-md bg-gray-700 text-gray-300 placeholder-gray-400 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                    />
                 </div>
 
                 {/* Mobile Buttons */}
