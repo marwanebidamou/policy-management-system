@@ -6,7 +6,7 @@ import PolicySearchForm from "./SearchPolicies";
 import { HandThumbUpIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 
 export default function ListPolicies() {
-    const { uiConfig, setUi, addNotification } = useGlobalContext();
+    const { uiConfig, setUi, addNotification, isAuthenticated } = useGlobalContext();
 
     const [filters, setFilters] = useState({
         academicYear: new Date().getFullYear(),
@@ -16,7 +16,7 @@ export default function ListPolicies() {
         title: ''
     });
 
-    const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
+    const [pagination, setPagination] = useState({ page: 1, limit: 100, total: 0, pages: 0 });
 
     const [orderBy, setOrderBy] = useState(SearchPolicyOrderBy.UpvotesCount);
 
@@ -39,7 +39,7 @@ export default function ListPolicies() {
                     page: res.paginationProps.page,
                     total: res.paginationProps.total,
                     pages: res.paginationProps.pages,
-                    limit: 10
+                    limit: 100
                 });
             })
             .catch(err => {
@@ -61,7 +61,7 @@ export default function ListPolicies() {
         };
 
         setFilters(updatedFilters);
-        await searchPolicies({ filters: updatedFilters, pagination: { page: 1, limit: 10 } });
+        await searchPolicies({ filters: updatedFilters, pagination: { page: 1, limit: 100 }, orderBy: criteria.orderBy || SearchPolicyOrderBy.UpvotesCount });
     };
 
     useEffect(() => {
@@ -73,6 +73,10 @@ export default function ListPolicies() {
 
     const handleUpvote = async (policyId: string) => {
         try {
+            if (!isAuthenticated()) {
+                addNotification("Login or sign up to upvote policies!", "info");
+                return;
+            }
             const result = await upvotePolicy(policyId);
             if (result.success) {
                 setListPolicies(prevPolicies =>
@@ -93,8 +97,11 @@ export default function ListPolicies() {
     };
 
     return (
+
         <>
+
             <PolicySearchForm onSearch={handleSearch} />
+            <h4 className="text-lg font-medium text-gray-900">Policies ({policies.length})</h4>
             <ul role="list" className="divide-y divide-gray-200 w-full bg-white shadow-sm rounded-md p-4">
                 {policies.map(policy => (
                     <li

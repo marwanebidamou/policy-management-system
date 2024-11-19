@@ -18,6 +18,11 @@ export const fetchPolicies = async (searchObj: SearchPolicyDTO): Promise<SearchP
 };
 
 
+export const fetchPolicyById = async (policyId: string): Promise<PolicyDTO> => {
+    const response = await apiClient.get<PolicyDTO>(`/policy/${policyId}`);
+    return response.data;
+};
+
 
 export const upvotePolicy = async (policyId: string): Promise<UpVotePolicyResponseDTO> => {
     const response = await apiClient.post<UpVotePolicyResponseDTO>(`/policy/${policyId}/upvote`);

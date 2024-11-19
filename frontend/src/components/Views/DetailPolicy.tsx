@@ -1,106 +1,115 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { CommentItemDTO, CommentListDTO, commentOnPolicy, fetchComments, fetchPolicyById } from "../../api/policyService";
+import { useGlobalContext } from "../../contexts/GlobalContext";
 
 export default function PolicyDetail() {
-  const [policy, setPolicy] = useState({
-    title: "Privacy Policy",
-    description: "This policy describes how we handle your data responsibly.",
-    author: { username: "admin_user" },
-    createdAt: "2024-11-16T14:44:50.991Z",
-    tags: [
-      { _id: "1", name: "Privacy" },
-      { _id: "2", name: "Data Protection" },
-    ],
-    comments: [
-      {
-        id: "1",
-        text: "This is a great policy!",
-        author: "user123",
-        createdAt: "2024-11-15T10:00:00.000Z",
-      },
-      {
-        id: "2",
-        text: "I think this needs more clarification on data usage.",
-        author: "user456",
-        createdAt: "2024-11-16T12:30:00.000Z",
-      },
-    ],
-  });
-
+  const { id } = useParams<{ id: string }>();
+  const [policy, setPolicy] = useState<any | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const handleAddComment = () => {
+  const { addNotification, uiConfig, setUi, isAuthenticated } = useGlobalContext();
+
+  useEffect(() => {
+    setUi({ ...uiConfig, heading: 'Detail Policy ' })
+  }, []);
+  useEffect(() => {
+    if (!id) return;
+
+    // Fetch Policy and Comments
+    const fetchPolicyData = async () => {
+      setLoading(true);
+      try {
+        // Fetch policy details
+        const fetchedPolicy = await fetchPolicyById(id);
+        setPolicy(fetchedPolicy);
+        setUi({ ...uiConfig, heading: 'Detail Policy :' + fetchedPolicy.title })
+
+        // Fetch comments
+        const commentsResponse: CommentListDTO = await fetchComments(id, 1, 1000);
+        setComments(commentsResponse.data || Array<CommentItemDTO>());
+      } catch (err) {
+        console.error("Error fetching policy or comments:", err);
+        setError("Failed to load policy details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPolicyData();
+  }, [id]);
+
+  const handleAddComment = async () => {
+
     if (newComment.trim()) {
-      const comment = {
-        id: new Date().toISOString(),
-        text: newComment,
-        author: "Current User", // Mock user
-        createdAt: new Date().toISOString(),
-      };
-      setPolicy((prevPolicy) => ({
-        ...prevPolicy,
-        comments: [...prevPolicy.comments, comment],
-      }));
-      setNewComment(""); // Clear the input field
+      commentOnPolicy(id as string, newComment).then(res => {
+        if (res.success) {
+          addNotification('Comment has been posted succesfully!', "success");
+          setNewComment("");
+        }
+      }).then(async () => {
+        // Fetch comments
+        const commentsResponse: CommentListDTO = await fetchComments(id as string, 1, 1000);
+        setComments(commentsResponse.data || Array<CommentItemDTO>());
+      }).catch(error => {
+        addNotification('An error occurred while adding the comment. Please try again later.', "error");
+
+        console.error(error);
+      })
     }
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div>
       {/* Policy Details */}
-      <div className="px-4 sm:px-0">
-        <h3 className="text-base font-semibold text-gray-900">{policy.title}</h3>
-        <p className="mt-1 max-w-2xl text-sm text-gray-500">Policy details and metadata.</p>
+      <div className="p-6 bg-white shadow rounded-lg">
+        {/* Title */}
+        <div className="mb-4">
+          <p className="text-sm text-gray-500">
+            Created on {new Date(policy.createdAt).toLocaleDateString()} by{" "}
+            <span className="font-semibold">{policy.author?.username || "Unknown"}</span>
+          </p>
+        </div>
+
+        {/* Description */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-gray-800">Description</h2>
+          <p className="mt-2 text-gray-700">{policy.description}</p>
+        </div>
+
+        {/* Tags */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800">Tags</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {policy.tags.map((tag: any) => (
+              <span
+                key={tag._id}
+                className="inline-block bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full"
+              >
+                #{tag.name}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="mt-6 border-t border-gray-100">
-        <dl className="divide-y divide-gray-100">
-          {/* Title */}
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium text-gray-900">Title</dt>
-            <dd className="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">{policy.title}</dd>
-          </div>
-          {/* Description */}
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium text-gray-900">Description</dt>
-            <dd className="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">{policy.description}</dd>
-          </div>
-          {/* Author */}
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium text-gray-900">Author</dt>
-            <dd className="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">{policy.author.username}</dd>
-          </div>
-          {/* Created At */}
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium text-gray-900">Created At</dt>
-            <dd className="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">
-              {new Date(policy.createdAt).toLocaleDateString()}
-            </dd>
-          </div>
-          {/* Tags */}
-          <div className="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-            <dt className="text-sm font-medium text-gray-900">Tags</dt>
-            <dd className="mt-1 text-sm text-gray-700 sm:col-span-2 sm:mt-0">
-              {policy.tags.map((tag) => (
-                <span
-                  key={tag._id}
-                  className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded mr-2"
-                >
-                  #{tag.name}
-                </span>
-              ))}
-            </dd>
-          </div>
-        </dl>
-      </div>
+
+
 
       {/* Comments Section */}
       <div className="mt-6">
-        <h4 className="text-lg font-medium text-gray-900">Comments</h4>
+        <h4 className="text-lg font-medium text-gray-900">Comments ({comments.length})</h4>
         <div className="mt-4 space-y-4">
-          {policy.comments.map((comment) => (
-            <div key={comment.id} className="p-4 border rounded-lg bg-gray-50">
-              <p className="text-sm text-gray-700">{comment.text}</p>
+          {comments.map((comment) => (
+            <div key={comment._id} className="p-4 border rounded-lg bg-gray-50">
+              <p className="text-sm text-gray-700">{comment.content}</p>
               <p className="mt-2 text-xs text-gray-500">
-                By {comment.author} on {new Date(comment.createdAt).toLocaleDateString()}
+                By {comment.author.username} on {new Date(comment.date).toLocaleDateString()}
               </p>
             </div>
           ))}
@@ -108,25 +117,31 @@ export default function PolicyDetail() {
       </div>
 
       {/* Add New Comment */}
-      <div className="mt-6">
-        <h4 className="text-lg font-medium text-gray-900">Add a Comment</h4>
-        <div className="mt-4 flex gap-2">
-          <textarea
-            rows={3}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="Write your comment here..."
-          />
-          <button
-            type="button"
-            onClick={handleAddComment}
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500"
-          >
-            Add
-          </button>
-        </div>
-      </div>
+      {isAuthenticated() ?
+        (<>
+          <div className="mt-6">
+            <h4 className="text-lg font-medium text-gray-900">Add a Comment</h4>
+            <div className="mt-4 flex gap-2">
+              <textarea
+                rows={3}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Write your comment here..."
+              />
+              <button
+                type="button"
+                onClick={handleAddComment}
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </>) : (<>
+          <h4>Login or sign up to add new comments</h4>
+        </>)}
+
     </div>
   );
 }
