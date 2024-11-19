@@ -115,7 +115,7 @@ export default function ListPolicies() {
                                     {policy.title}
                                 </Link>
                                 <p className="text-sm text-gray-600">
-                                    By {policy.author?.username || "Unknown"}
+                                    By {policy.author?.username || "Unknown"} - Added on {new Date(policy.createdAt).toLocaleDateString()}
                                 </p>
                                 <p className="mt-1 text-sm text-gray-600 line-clamp-2">
                                     {policy.description}
