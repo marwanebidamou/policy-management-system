@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CommentItemDTO, CommentListDTO, commentOnPolicy, fetchComments, fetchPolicyById } from "../../api/policyService";
 import { useGlobalContext } from "../../contexts/GlobalContext";

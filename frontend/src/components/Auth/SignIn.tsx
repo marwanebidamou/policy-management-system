@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, FormEventHandler, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGlobalContext } from "../../contexts/GlobalContext";
 import { loginApi } from "../../api/authService";

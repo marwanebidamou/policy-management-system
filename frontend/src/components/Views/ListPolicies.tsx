@@ -96,12 +96,15 @@ export default function ListPolicies() {
         }
     };
 
+
     return (
 
         <>
 
             <PolicySearchForm onSearch={handleSearch} />
-            <h4 className="text-lg font-medium text-gray-900">Policies ({policies.length})</h4>
+            <h4 className="text-lg font-medium text-gray-900 mt-2">Policies ({policies.length})</h4>
+            {loading && <div>Loading...</div>}
+
             <ul role="list" className="divide-y divide-gray-200 w-full bg-white shadow-sm rounded-md p-4">
                 {policies.map(policy => (
                     <li
@@ -110,12 +113,6 @@ export default function ListPolicies() {
                     >
                         {/* Left Section */}
                         <div className="flex gap-x-4 items-start">
-                            {/* Static Image */}
-                            <img
-                                alt="Policy"
-                                src="https://via.placeholder.com/60"
-                                className="h-14 w-14 flex-none rounded-lg bg-gray-200"
-                            />
                             {/* Policy Info */}
                             <div className="flex flex-col">
                                 <Link to={`/policies/${policy._id}`} className="text-lg font-semibold text-gray-800 hover:underline">
