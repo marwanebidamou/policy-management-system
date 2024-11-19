@@ -136,13 +136,13 @@ export const getPolicyById = async (policyId: string): Promise<PolicyDTO> => {
         academicYear: policy.academicYear,
         createdAt: policy.createdAt,
         commentsCount: policy.commentsCount,
-        tags: policy.tags.map((tag: any) => ({
-            _id: tag._id.toString(),
-            name: tag.name,
+        tags: (policy.tags || []).map((tag: any) => ({
+            _id: tag._id?.toString() || '',
+            name: tag.name || '',
         })),
-        author: (typeof policy.authorId === 'object' && '_id' in policy.authorId && 'username' in policy.authorId) ?
-            { _id: policy.authorId._id.toString(), username: policy.authorId.username as string } :
-            { _id: policy.authorId.toString(), username: '' }
+        author: policy.authorId && typeof policy.authorId === 'object' && '_id' in policy.authorId && 'username' in policy.authorId
+            ? { _id: policy.authorId._id.toString(), username: policy.authorId.username as string }
+            : { _id: '', username: 'Unknown' }
     };
 
     return policyDTO;
