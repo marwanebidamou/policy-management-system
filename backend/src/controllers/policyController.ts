@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { CommentListDTO, commentPolicySchema, CreatePolicyDTO, createPolicySchema, PolicyDTO, PostCommentPolicy, PostCommentResponseDTO, SearchPolicyDTO, SearchPolicyResultDTO, UpVotePolicyResponseDTO } from "../dtos/policy.dto";
-import { commentPolicy, createPolicy, getAllPolicies, getCommentsOfPolicy, UpVotePolicy } from '../services/policyService';
+import { commentPolicy, createPolicy, getAllPolicies, getCommentsOfPolicy, getPolicyById, UpVotePolicy } from '../services/policyService';
 
 
 // Create a new tag
@@ -17,12 +17,24 @@ export const createPolicyAction = async (req: Request<{}, PolicyDTO, CreatePolic
 };
 
 
-// Create a new policy
+// Get all policies
 //ParamsDictionary, ResBody, ReqBody, ReqQuery
 export const getPoliciesAction = async (req: Request<{}, SearchPolicyResultDTO, {}, SearchPolicyDTO>, res: Response, next: NextFunction) => {
     try {
         const userId = req.headers['userId'] as string;
         const result = await getAllPolicies(userId, req.query);
+
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get policy by id
+//ParamsDictionary, ResBody, ReqBody, ReqQuery
+export const getPoliciyAction = async (req: Request<{ id: string }, PolicyDTO, {}, {}>, res: Response, next: NextFunction) => {
+    try {
+        const result = await getPolicyById(req.params.id);
 
         res.status(200).json(result);
     } catch (error) {

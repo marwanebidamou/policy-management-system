@@ -119,6 +119,35 @@ export const getAllPolicies = async (
 };
 
 
+export const getPolicyById = async (policyId: string): Promise<PolicyDTO> => {
+    const policy = await Policy.findById(policyId)
+        .populate('tags')
+        .populate('authorId');
+
+    if (!policy) {
+        throw new BaseError('Policy not found', BaseErrorType.NotFound);
+    }
+
+    const policyDTO: PolicyDTO = {
+        _id: policy._id as string,
+        title: policy.title,
+        description: policy.description,
+        upvotesCount: policy.upvotesCount,
+        academicYear: policy.academicYear,
+        createdAt: policy.createdAt,
+        commentsCount: policy.commentsCount,
+        tags: policy.tags.map((tag: any) => ({
+            _id: tag._id.toString(),
+            name: tag.name,
+        })),
+        author: (typeof policy.authorId === 'object' && '_id' in policy.authorId && 'username' in policy.authorId) ?
+            { _id: policy.authorId._id.toString(), username: policy.authorId.username as string } :
+            { _id: policy.authorId.toString(), username: '' }
+    };
+
+    return policyDTO;
+};
+
 const getSortOption = (orderBy: SearchPolicyOrderBy | undefined): Record<string, 1 | -1> => {
     switch (orderBy) {
         case SearchPolicyOrderBy.DateAsc:
